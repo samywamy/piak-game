@@ -1,7 +1,6 @@
 body {
 	background-color: #000000;
 	margin: 0 auto;
-	padding: 25px;
 	text-align: center;
 	font-family: sans-serif;
 }
@@ -10,6 +9,12 @@ h1 {
 	color: #ffffff;
 	font-size: 40px;
 	font-weight: 400;
+}
+
+img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
 }
 
 #container {
@@ -26,7 +31,7 @@ h1 {
 	flex: 0 0 150px;                       /* don't grow, don't shrink, width */
 	height: 150px;
 	margin: 6px;
-	background-color: #70ef6e;
+	background-color: #ffffff;
 	border: 1px;
 	border-radius: 8px;
 	display: flex;
@@ -34,13 +39,13 @@ h1 {
   	align-items: center;                     /* establish flex container */
 }
 
-
-
-
-
-
-
-
+#score-box {
+	background-color: #ffffff;
+	border: 1px;
+	border-radius: 3px;
+	margin: 30px;
+	padding: 5px;
+}
 
 
 
