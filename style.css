@@ -1,0 +1,52 @@
+body {
+	background-color: #000000;
+	margin: 0 auto;
+	padding: 25px;
+	text-align: center;
+	font-family: sans-serif;
+}
+
+h1 {
+	color: #ffffff;
+	font-size: 40px;
+	font-weight: 400;
+}
+
+#container {
+	margin: 0 auto;
+	width: 490px;
+	display: flex;                       /* establish flex container */
+ 	flex-wrap: wrap;                     /* enable flex items to wrap */
+ 	justify-content: space-around;
+	background-color: #000000;
+	padding: 10px;
+}
+
+.num {
+	flex: 0 0 150px;                       /* don't grow, don't shrink, width */
+	height: 150px;
+	margin: 6px;
+	background-color: #70ef6e;
+	border: 1px;
+	border-radius: 8px;
+	display: flex;
+  	justify-content: center;
+  	align-items: center;                     /* establish flex container */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
