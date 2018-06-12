@@ -46,7 +46,8 @@ var TRAP = {
 var THRESHOLD_ROACH = 500;
 var THRESHOLD_TRAP = 1000;
 
-var MISS_SCORE = 20;
+var MISS_SCORE = 50;
+var TIMEOUT_PENALTY = 50;
 var scoreBox = document.getElementById('score-box');
 scoreBox.innerHTML = 'Score: ' + 0;
 var score = 0;
@@ -74,35 +75,68 @@ var numArr = [ undefined, num1, num2, num3, num4, num5, num6, num7, num8, num9 ]
 
 document.getElementById('start-button').addEventListener('click', gameStart);
 
-function tick() {
+var timeout = 2000, showRoach = false, showTrap = false, keyPressed = false;
+
+document.onkeydown = function(event) { 
+						var key = parseInt(event.keyCode);
+						if (key > 48 && key < 58) {
+							key -= 48;
+						} else if (key > 96 && key < 106) {
+							key -= 96;
+						}
+						keyPress(key); 
+					}; // register the keypress event
+
+function tick() { // this function generates a random object on a random square
+	if (!keyPressed) { // if no key was pressed, timeout penalty is deducted
+		score -= TIMEOUT_PENALTY;
+	}
 	numArr[currentSquare.square].innerHTML = ''; // - clear the content of the current square
+	scoreBox.innerHTML = 'Score: ' + score;
+
+	if (score < 0) {
+		gameOver();
+		return;
+	}
+	keyPressed = false;
 	var randomNum = Math.floor(Math.random() * 9) + 1;// - generate a random number between 1 and 9
 	var newSquare = numArr[randomNum]; // 'assign' the index of array element using randomNum
     newSquare.appendChild(image); // append img tag to newSquare
     image.src = FLY.image; // - add the fly image to that square
 	currentSquare.square = randomNum; // - update currentSquare with the new info
 	currentSquare.occupier = FLY;
+
+	setTimeout(tick, timeout);
 }
+
+// if no keypress is detected on tick, it logs score and clears square then exits function, 
+// then tick sets keypress to false again to generate new bug, then calls itself again. 
+// and if keypress detected, keypress function is called instead, and the score logs there.
 
 function gameStart() {
 	score = 0;
-	// currentSquare = {square: 0, occupier: undefined};
-	// for (var i = 1; i < numArr.length; i++) {
-	// 	numArr[i].innerHTML = '';
-	// }
-	numArr[currentSquare.square].innerHTML = '';
-	scoreBox.innerHTML = 'Score: ' + score;
+	scoreBox.innerHTML = 'Score: ' + score; // reset score box
+
+	keyPressed = true; // when game starts, it ticks for a new fly, but no key has been pressed yet, if keypressed isn't true, game would deduct the penalty
 	tick();
-	setInterval(tick, 1000);
 }
 
+function keyPress(key) {
+	console.log("key pressed: " + key + " and current square: " + currentSquare.square);
+	// if (keyPressed) {
+	// 	return; // if a key was already pressed, exit the function
+	// }
+	keyPressed = true;
+	if (key == currentSquare.square) { // if key matches square
+		score += currentSquare.occupier.points; // add to score
+		numArr[currentSquare.square].innerHTML = ''; // - clear the content of the current square
+	} else {
+		score -= MISS_SCORE; // deduct score
+	}
+	scoreBox.innerHTML = 'Score: ' + score;
+}
 
-
-
-
-
-
-
-
-
+function gameOver() {
+	alert("Game Over");
+}
 
