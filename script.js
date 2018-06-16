@@ -48,16 +48,22 @@ var NUM = {
 	nums: [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
 }
 
-var THRESHOLD_ROACH = 100;
-var THRESHOLD_TRAP = 200;
+var THRESHOLD_ROACH = 150;
+var THRESHOLD_TRAP = 400;
 var THRESHOLD_NUM = 500;
 
 var MISS_SCORE = 50;
 var TIMEOUT_PENALTY = 50;
 var scoreBox = document.getElementById('score-box');
+var maxScoreBox = document.getElementById('max-score');
+var topScoreBox = document.getElementById('top-score');
 scoreBox.innerHTML = 'Score: ' + 0;
-var score = 0;
+maxScoreBox.innerHTML = 'Max score: ' + 0;
+topScoreBox.innerHTML = 'Top score: ' + 0;
 
+var score = 0;
+var maxScore = 0;
+var topScore = 0;
 var currentSquares = [];
 
 var numArr = [ undefined, document.getElementById('num1'), document.getElementById('num2'), 
@@ -65,16 +71,15 @@ var numArr = [ undefined, document.getElementById('num1'), document.getElementBy
 				document.getElementById('num6'), document.getElementById('num7'), document.getElementById('num8'), 
 				document.getElementById('num9') ];
 
-document.getElementById('start-button').addEventListener('click', gameStart);
+var startBlinker = document.getElementById('blinker');
 
-var timeout = 2000, gameOverBool = false, keyPressed = false;
-
+var timeout = 2000, gameOverBool = true, keyPressed = false;
 
 function keydownFunction(event) { 
 	var key = parseInt(event.keyCode);
-	if (key > 48 && key < 58) {
+	if (key > 47 && key < 58) {
 		key -= 48;
-	} else if (key > 96 && key < 106) {
+	} else if (key > 95 && key < 106) {
 		key -= 96;
 	}
 	keyPress(key); 
@@ -94,14 +99,16 @@ function tick() { // generates a random object on a random square
 	keyPressed = false;
 	spawn();
 	if (showState == SHOW_NUM) {
-		timeout = timeout - 10; // <--- you can do dis!? so coooool
+		timeout = timeout - 10;
 	}
 	setTimeout(tick, timeout);
 }
 
 function gameStart() {
-	score = 0; showState = 1;
+	startBlinker.style.visibility = 'hidden';
+	score = 0; maxScore = 0; showState = 1;
     scoreBox.innerHTML = 'Score: ' + score; // reset score box
+    maxScoreBox.innerHTML = 'Max score: ' + score;
     gameOverBool = false;
 
 	keyPressed = true; // when game starts, it ticks for a new fly, but no key has been pressed yet, if keypressed isn't true, game would deduct the penalty
@@ -110,6 +117,12 @@ function gameStart() {
 
 function keyPress(key) {
 	if (gameOverBool) {
+        if (key === 0) {
+            gameStart();
+		}	
+		return;
+	}	
+	if (key < 1 || key > 9) {
 		return;
 	}
     keyPressed = true;
@@ -124,6 +137,12 @@ function keyPress(key) {
             image.src = ROACH.images[1];
     	} else {
     		score += currentSquare.points;
+    		if (maxScore < score) {
+    			maxScore = score;
+    		}
+    		if (maxScore > topScore) {
+    			topScore = maxScore;
+    		}
 			numArr[currentSquare.square].innerHTML = ''; // - clear the content of the current square
 			currentSquares.splice(index, 1); // removes square from array
         }
@@ -131,6 +150,8 @@ function keyPress(key) {
     	score -= MISS_SCORE; // deduct score
     }
 	scoreBox.innerHTML = 'Score: ' + score;
+	maxScoreBox.innerHTML = 'Max score: ' + maxScore;
+	topScoreBox.innerHTML = 'Top score: ' + topScore;
 }
 
 function indexOfKeyPress(key) {
@@ -147,9 +168,7 @@ function indexOfKeyPress(key) {
 function gameOver() {
 	gameOverBool = true;
     alert("Game Over");
-    // maybe add a global boolean to tell you game is over, so you can use that in order to not receive keypresses anymore.
-    // or maybe remove the keypress listener and add it only when the game starts, idk
-
+    startBlinker.style.visibility = '';
 }
 
 function spawn() {
