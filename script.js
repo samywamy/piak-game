@@ -155,14 +155,25 @@ function keyPress(key) {
 }
 
 function indexOfKeyPress(key) {
-    // function finds key in currentSquares. return index of the key 
+    // function finds key in currentSquares. return index of the key
+    var idx = -1;
     for (var i = 0; i < currentSquares.length; i++) {
     	if (currentSquares[i].key == key) {
-    		return i;
+            if (currentSquares[i].points > 0) {
+                return i;
+            } else {
+                idx = i;
+            }
     	}
     }
-    return -1;
+    return idx;
 }
+// to address the issue of sticky trap landing on a num's square
+// if no key is found, the function will still return -1 as before
+// if a key is found, it will check the points, if they are positive, it will just immediately return that index,
+// if the points are negative, we remember the index i in the var index and keep looking
+// if we never find another index with the same key and positive points,
+// that means the index of the negative points will be returned
 
 
 function gameOver() {
