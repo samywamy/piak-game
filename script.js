@@ -40,7 +40,7 @@ var ROACH = {
 
 var TRAP = {
 	points: -20,
-	image: './assets/trap.jpg'
+	image: './assets/trap.png'
 }
 
 var NUM = {
@@ -48,9 +48,9 @@ var NUM = {
 	nums: [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
 }
 
-var THRESHOLD_ROACH = 150;
-var THRESHOLD_TRAP = 400;
-var THRESHOLD_NUM = 500;
+var THRESHOLD_ROACH = 10;
+var THRESHOLD_TRAP = 10;
+var THRESHOLD_NUM = 10;
 
 var MISS_SCORE = 50;
 var TIMEOUT_PENALTY = 50;
@@ -65,6 +65,9 @@ var score = 0;
 var maxScore = 0;
 var topScore = 0;
 var currentSquares = [];
+
+var SHOW_FLY = 1, SHOW_ROACH = 2, SHOW_TRAP = 3, SHOW_NUM = 4;
+var showState = 0;
 
 var numArr = [ undefined, document.getElementById('num1'), document.getElementById('num2'), 
 				document.getElementById('num3'), document.getElementById('num4'), document.getElementById('num5'), 
@@ -88,8 +91,10 @@ function keydownFunction(event) {
 document.onkeydown = keydownFunction;
 
 function tick() { // generates a random object on a random square
-	if (!keyPressed) { // if no key was pressed, timeout penalty is deducted
-		score -= TIMEOUT_PENALTY;
+	if (!keyPressed) { // if no key was pressed,
+		if (stickyTrapMiss()) { // and it wasn't a sticky trap that spawned,
+			score -= TIMEOUT_PENALTY; // points are deducted
+		}
 	}
 	scoreBox.innerHTML = 'Score: ' + score;
 	if (score < 0) {
@@ -97,15 +102,30 @@ function tick() { // generates a random object on a random square
 		return;
 	}
 	keyPressed = false;
-	spawn();
-	if (showState == SHOW_NUM) {
-		timeout = timeout - 10;
-	}
-	setTimeout(tick, timeout);
-}
+    if (adjustState()) {
+        // return;
+    }
+    spawn();
+    if (showState == SHOW_NUM) {
+        timeout = timeout - 100;
+    }
+    setTimeout(tick, timeout);
+    // equivalently you can write 
+    // if ( !adjustState() ) {
+    //     spawn();
+    //     if (showState == SHOW_NUM) {
+    //         timeout = timeout - 10;
+    //     }
+    //     setTimeout(tick, timeout);
+    // }
+} 
+// in adjustState, you can now call the function that shows the information popup, whenever a state is changed.
+// either starting a timer to a function that will close the popup and restart the game (by calling tick)
+// or restarting the game (by calling tick) when the popup is closed
 
 function gameStart() {
 	startBlinker.style.visibility = 'hidden';
+	timeout = 2000; // takes the game back to original speed
 	score = 0; maxScore = 0; showState = 1;
     scoreBox.innerHTML = 'Score: ' + score; // reset score box
     maxScoreBox.innerHTML = 'Max score: ' + score;
@@ -129,10 +149,10 @@ function keyPress(key) {
 	var index = indexOfKeyPress(key);
 	if (index != -1) {
         var currentSquare = currentSquares[index];
-    	if (currentSquare.whacks == 2) {
+    	if (currentSquare.whacks == 2) { // to know if spawn is a cockroach, which needs 2 whacks
     		currentSquare.whacks = 1;
             var numDiv = numArr[currentSquare.square];
-            var imagesArr = numDiv.getElementsByTagName('img');
+            var imagesArr = numDiv.getElementsByTagName('img'); // changes 2nd whack image
             var image = imagesArr[0];
             image.src = ROACH.images[1];
     	} else {
@@ -153,6 +173,19 @@ function keyPress(key) {
 	maxScoreBox.innerHTML = 'Max score: ' + maxScore;
 	topScoreBox.innerHTML = 'Top score: ' + topScore;
 }
+
+function stickyTrapMiss() { // for when if only traps spawn and no key is pressed. miss score won't deduct
+	// function searches for positive points inside currentSquares and returns a boolean
+	for (var i = 0; i < currentSquares.length; i++) {
+		if (currentSquares[i].points > 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// 1) var points = -1; is never used, and ,
+// 2) if the function never finds any positive points it also needs to return something
 
 function indexOfKeyPress(key) {
     // function finds key in currentSquares. return index of the key
@@ -183,12 +216,11 @@ function gameOver() {
 }
 
 function spawn() {
-	adjustState();
     clearAllSquares();
 
-    var numOfSpawns = Math.floor(Math.random() * 3) + 1;
+    var numOfSpawns = Math.floor(Math.random() * 3) + 1; // randomly generates 1-3 spawns each time
     for (var i = 0; i < numOfSpawns; i++) {
-        var randomSpawn = Math.floor(Math.random() * showState); // randomly picks a spawn taking into consideration the showState
+        var randomSpawn = Math.floor(Math.random() * showState); // randomly picks spawns taking into consideration the showState
         spawnArr[randomSpawn] ();
     }
 }
@@ -240,29 +272,32 @@ function clearAllSquares() {
     currentSquares = []; // empty the array
 }
 
-var SHOW_FLY = 1, SHOW_ROACH = 2, SHOW_TRAP = 3, SHOW_NUM = 4;
-var showState = 0;
-
 function adjustState() {
 	switch (showState) {
-		case SHOW_FLY:
+		case SHOW_FLY: // spawns fly only
 			if (score > THRESHOLD_ROACH) {
 				showState = SHOW_ROACH;
-			}
-		case SHOW_ROACH:
-			if (score > THRESHOLD_TRAP) {
-				showState = SHOW_TRAP;
+				return true;
 			}
 			break;
-		case SHOW_TRAP:
+		case SHOW_ROACH: // spawns fly and roach
+			if (score > THRESHOLD_TRAP) {
+				showState = SHOW_TRAP;
+				return true;
+			}
+			break;
+		case SHOW_TRAP: // spawns fly and roach and num
 			if (score > THRESHOLD_NUM) {
 				showState = SHOW_NUM;
+				return true;
 			}
 			break;
 	}
+	return false;
 }
 
-function squareAlreadyTaken(square) {
+
+function squareAlreadyTaken(square) { // prevents spawning on an already occupied square
 	for (var i = 0; i < currentSquares.length; i++) {
 		if (currentSquares[i].square === square) {
 			return true;
