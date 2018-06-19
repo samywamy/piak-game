@@ -1,33 +1,3 @@
-// game loads with a popup with a start button.
-// familiarize player with controls By making them press all keys on the numpad (optional)
-
-// game starts
-
-// a fly appears on a random square. Alert: Smash the fly!
-// player has to press the corresponding key the bug is on.
-// each fly gives 10 points.
-
-// when points reach 100, cockroach is unlocked. Alert: Smash the cockroach twice!
-// each cockroach takes 2 hits to kill but gives 20 points.
-// game gets faster
-
-// when points reach 500, sticky trap is unlocked. Alert: Don't touch the sticky trap!
-// if player hits a sticky trap, 50 points are taken away.
-
-// when points reach 1000, numbers are unlocked. Alert: Enter the NUMBER shown!
-// random number from 1-9 appears on random square.
-// player has to hit the NUMBER on the numpad and not the position.
-// gives 30 points
-
-// if a wrong square is hit at any time, -50 points.
-
-// game gets faster and faster until all of player's points are lost.
-
-// while points <100, spawn fly only
-// while points <500, spawn fly and cockroach only. set interval to increase spawn rate every x seconds
-// while points <1000, spawn fly, cockroach and trap only. set interval to increase spawn rate every x seconds
-
-
 var FLY = {
 	points: 10,
 	image: './assets/fly.gif'
@@ -48,9 +18,9 @@ var NUM = {
 	nums: [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
 }
 
-var THRESHOLD_ROACH = 10;
-var THRESHOLD_TRAP = 10;
-var THRESHOLD_NUM = 10;
+var THRESHOLD_ROACH = 100;
+var THRESHOLD_TRAP = 350;
+var THRESHOLD_NUM = 500;
 
 var MISS_SCORE = 50;
 var TIMEOUT_PENALTY = 50;
@@ -103,11 +73,12 @@ function tick() { // generates a random object on a random square
 	}
 	keyPressed = false;
     if (adjustState()) {
-        // return;
+    	showPopup();
+        return;
     }
     spawn();
     if (showState == SHOW_NUM) {
-        timeout = timeout - 100;
+        timeout = timeout - 10;
     }
     setTimeout(tick, timeout);
     // equivalently you can write 
@@ -132,7 +103,7 @@ function gameStart() {
     gameOverBool = false;
 
 	keyPressed = true; // when game starts, it ticks for a new fly, but no key has been pressed yet, if keypressed isn't true, game would deduct the penalty
-	tick();
+	showPopup();
 }
 
 function keyPress(key) {
@@ -232,6 +203,7 @@ function spawnFLY() {
     var image = document.createElement('img');
     image.src = FLY.image;
     numArr[squareNumber].appendChild(image);
+    randomImageFlip(numArr[squareNumber]);
 }
 
 function spawnROACH() {
@@ -241,10 +213,12 @@ function spawnROACH() {
     var image = document.createElement('img');
     image.src = ROACH.images[0];
     numArr[squareNumber].appendChild(image);
+    randomImageFlip(numArr[squareNumber]);
 }
 
 function spawnTRAP() {
 	var squareNumber = newRandomSquareNumber();
+	numArr[squareNumber].style.transform = ''; // resets a flipped square
     var currentSquare = {square: squareNumber, points: TRAP.points, whacks: 0, key: squareNumber};
 	currentSquares.push(currentSquare);
     var image = document.createElement('img');
@@ -254,12 +228,11 @@ function spawnTRAP() {
 
 function spawnNUM() {
 	var squareNumber = newRandomSquareNumber();
+	numArr[squareNumber].style.transform = ''; // resets a flipped square
 	var num = Math.floor(Math.random() * 9) + 1;
-    var currentSquare = {square: squareNumber, points: NUM.points, whacks: 1, key: num};
+	var currentSquare = {square: squareNumber, points: NUM.points, whacks: 1, key: num};
 	currentSquares.push(currentSquare);    
-    var square = document.createElement('h1');
-    square.innerHTML = num;
-    numArr[squareNumber].appendChild(square);
+	numArr[squareNumber].innerHTML = num;
 }
 
 var spawnArr = [spawnFLY, spawnROACH, spawnTRAP, spawnNUM];
@@ -296,7 +269,6 @@ function adjustState() {
 	return false;
 }
 
-
 function squareAlreadyTaken(square) { // prevents spawning on an already occupied square
 	for (var i = 0; i < currentSquares.length; i++) {
 		if (currentSquares[i].square === square) {
@@ -318,37 +290,45 @@ function newRandomSquareNumber() {
     return nrsn;
 }
 
-
-// thinking out loud
-
-// for number spawn, put on its own timeline? put every object on it's own timeline?
-
-// random spawn interval with min of x seconds, max of x seconds, and only a fixed timeout? random timeout?
-
-// timeout gets quicker 
-
-// objects should not disappear if they're not clicked. next object can still spawn
-// more than 1 object on the screen and to fill available squares where available.
-// randomised number should not be equal to the previous number
-// https://stackoverflow.com/questions/40056297/random-number-which-is-not-equal-to-the-previous-number
-// https://stackoverflow.com/questions/15585216/how-to-randomly-generate-numbers-without-repetition-in-javascript
-
-// random interval
-// set timeout but this increases as interval increases
-// this means clear square in tick cannot be used? put it in... timout?
+function randomImageFlip(square) {
+	var rif = Math.floor(Math.random() * 5) + 1;
+	if (rif == 2) {
+		square.style.transform = 'scaleY(-1)'; // flips the image
+	} else if (rif == 3) {
+		square.style.transform = 'rotate(90deg)';
+	} else if (rif == 4) {
+		square.style.transform = 'rotate(-90deg)';
+	} else if (rif == 5) {
+		square.style.transform = 'rotate(180deg)';
+	} else {
+		square.style.transform = '';
+	}
+}	
 
 
-// functions for each object?
-// functions for each level? sdmfnsdjkfsdjkfsdkjflk
+function showPopup() {
+	// tick();
+	// return;
+    var popup;
+	if (showState == SHOW_FLY) {
+		popup = document.getElementById('modal-fly');
+	} else if (showState == SHOW_ROACH) {
+        popup = document.getElementById('modal-roach');
+	} else if (showState == SHOW_TRAP) {
+        popup = document.getElementById('modal-trap');
+	} else if (showState == SHOW_NUM) {
+        popup = document.getElementById('modal-num');
+	}
+    popup.classList.toggle('modal');
+    popup.classList.toggle('modal-open');
+	setTimeout( function() { hidePopup(popup); } , 2500);
+}
 
-// KIV to do later
-// separate score and health. score only adds, health deducts and adds (when a health spawns occasionally)
-// default health 1000? which is also the max health. 
-// press numpad 0 to start game
-
-// spawnFly(), spawnFlyRoach(), spawnFlyRoachTrap(), spawnFlyRoachTrapNum()
-// spawnFly(), spawnRoach(), spawnTrap(), spawnNum()
-// randomise the functions in gamestart depending on score at current point in game
+function hidePopup(popup) {
+    popup.classList.toggle('modal-open');
+    popup.classList.toggle('modal');
+	tick();
+}
 
 
 

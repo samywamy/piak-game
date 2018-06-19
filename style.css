@@ -4,11 +4,10 @@ body {
 	margin: 0 auto;
 	text-align: center;
 	font-family: Arial;
-	font-size: 16px;
+	font-size: 18px;
 }   
 
 h1 {
-	float: left;
 	font-size: 40px;
 	font-weight: 400;
 }
@@ -44,12 +43,12 @@ img {
 	height: 150px;
 	margin: 4px;
 	color: #000000;
-	font-size: 60px;
 	background-color: #ffffff;
 	border-radius: 8px;
 	display: flex; /* establish flex container */
   	justify-content: center;
   	align-items: center;
+	font-size: 60px;
 }
 
 #score-row {
@@ -84,11 +83,11 @@ img {
 	transform: translate(-50%, -50%);
 	padding: 2em;
 	border-radius: 1em;
-	opacity: 0;
-	visibility: hidden;
+	/*opacity: 0;*/
+	/*visibility: hidden;*/
 	transition: all .5s;
 	font-size: 20px;
-	}
+}
 
 #modal:target {
 	opacity: 1;
@@ -96,6 +95,46 @@ img {
 }
 
 #modal:target .modal-content {
+	opacity: 1;
+	visibility: visible;
+}
+
+#modal-fly:target {
+	opacity: 1;
+	visibility: visible;
+}
+
+#modal-fly:target .modal-content {
+	opacity: 1;
+	visibility: visible;
+}
+
+#modal-roach:target {
+	opacity: 1;
+	visibility: visible;
+}
+
+#modal-roach:target .modal-content {
+	opacity: 1;
+	visibility: visible;
+}
+
+#modal-trap:target {
+	opacity: 1;
+	visibility: visible;
+}
+
+#modal-trap:target .modal-content {
+	opacity: 1;
+	visibility: visible;
+}
+
+#modal-num:target {
+	opacity: 1;
+	visibility: visible;
+}
+
+#modal-num:target .modal-content {
 	opacity: 1;
 	visibility: visible;
 }
@@ -116,15 +155,16 @@ img {
 .modal-open {
 	display: inline-block;
 	color: #ffffff;
+	transition: all .5s;
 }
 
 .modal-button {
 	background-color: #F2E35F;
-	padding: 5px 10px 5px 10px;
+	padding: 10px 15px 10px 15px;
 	border: 1px;
 	border-color: #F2B705;
-	border-radius: 3px;
-	font-size: 16px;
+	border-radius: 5px;
+	font-size: 18px;
 }
 
 .modal-button a {
@@ -137,12 +177,9 @@ img {
 }
 
 p img {
-	width: 60px;
-	height: 60px;
+	width: 100px;
+	height: 100px;
 }
-
-
-
 
 
 
